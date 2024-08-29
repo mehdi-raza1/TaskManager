@@ -49,7 +49,7 @@ export default function UserTask() {
         {user.task.map((task) => (
           <li
             key={task.taskId}
-            onClick={() => onOpenModal(task.taskId)}
+            // onClick={() => onOpenModal(task.taskId)}
             className="mt-2 flex text-xl justify-between items-center bg-violet-200 hover:bg-violet-300 px-4 py-2 rounded cursor-pointer"
           >
             <div>
@@ -70,6 +70,15 @@ export default function UserTask() {
                 className="text-white capitalize bg-red-500 border-0 py-1 me-4 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
               >
                 Delete
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenModal(task.taskId);
+                }}
+                className="text-white capitalize bg-yellow-400 border-0 py-1 me-4 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
+              >
+                Edit
               </button>
             </div>
           </li>

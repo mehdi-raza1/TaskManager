@@ -1,44 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addUser, deleteTask, addTask } from "../../redux/userSlice";
-import { Modal } from "react-responsive-modal";
-import "react-responsive-modal/styles.css";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState } from "react";
+import withHOC from "./withHOC";
 import { useNavigate } from "react-router-dom";
-import { nanoid } from "@reduxjs/toolkit";
-import UsersData from "../HOC/UserHoc";
+import { nanoid } from "nanoid";
+import Modal from "react-responsive-modal";
+import { toast } from "react-toastify";
 
-function Users() {
-  const userData = useSelector((state) => state.user.users);
-  const dispatch = useDispatch();
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((data) => setUsers(data))
-      .catch((error) => {
-        console.log(error);
-        toast.error("Failed to fetch Data");
-      });
-  }, []);
-
-  function handleFetchUser() {
-    users.forEach((user) => {
-      dispatch(
-        addUser({
-          id: user.id,
-          userName: user.username,
-          task: [],
-        })
-      );
-    });
-  }
-
-  // Modals
+const UserHoc = ({ users, addUser, addTask, updateTask, deleteTask }) => {
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
   const onOpenModal = (user) => {
     setSelectedUser(user);
     setOpen(true);
@@ -48,6 +18,10 @@ function Users() {
     setOpen(false);
     setSelectedUser(null);
   };
+  const onOpenTaskModal = (user) => {
+    setTaskUser(user);
+    setModalOpen(true);
+  };
 
   // Modal for adding a task
   const [modalOpen, setModalOpen] = useState(false);
@@ -56,10 +30,7 @@ function Users() {
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
 
-  const onOpenTaskModal = (user) => {
-    setTaskUser(user);
-    setModalOpen(true);
-  };
+
 
   const onCloseTaskModal = () => {
     setModalOpen(false);
@@ -75,12 +46,10 @@ function Users() {
       return;
     }
 
-    dispatch(
-      addTask({
-        id: id,
-        task: { taskId: nanoid(), taskName: task, taskDate: date },
-      })
-    );
+    addTask({
+      id: id,
+      task: { taskId: nanoid(), taskName: task, taskDate: date },
+    });
 
     toast.success("🦄 Task Added");
     setTask("");
@@ -90,18 +59,11 @@ function Users() {
   };
 
   const navigate = useNavigate();
+
   return (
     <div className="container mx-auto text-center mt-16">
-      <button
-        onClick={handleFetchUser}
-        className="py-2 px-5 bg-violet-500 text-white font-semibold rounded-full shadow-md hover:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75"
-      >
-        Fetch Users
-      </button>
-      <UsersData/>
-
-      {/* <ul className="list-none mt-6">
-        {userData.map((user, index) => (
+      <ul className="list-none mt-6">
+        {users.map((user, index) => (
           <li
             onClick={() => onOpenModal(user)}
             className="mt-2 flex justify-between items-center bg-violet-200 hover:bg-violet-300 px-4 py-2 rounded cursor-pointer"
@@ -142,10 +104,10 @@ function Users() {
             </div>
           </li>
         ))}
-      </ul> */}
+      </ul>
 
       {/* Modal for displaying tasks */}
-      {/* <Modal open={open} onClose={onCloseModal} center>
+      <Modal open={open} onClose={onCloseModal} center>
         <h2>Tasks:</h2>
         {selectedUser && selectedUser.task.length > 0 ? (
           <ul>
@@ -159,10 +121,10 @@ function Users() {
         ) : (
           <p>No tasks available.</p>
         )}
-      </Modal> */}
+      </Modal>
 
       {/* Modal for adding tasks */}
-      {/* <Modal open={modalOpen} onClose={onCloseTaskModal} center>
+      <Modal open={modalOpen} onClose={onCloseTaskModal} center>
         <h2>Add Task for {taskUser && taskUser.userName}</h2>
         {error && <p className="text-red-500">{error}</p>}
         <form
@@ -190,9 +152,11 @@ function Users() {
             Submit Task
           </button>
         </form>
-      </Modal> */}
+      </Modal>
     </div>
   );
-}
+};
 
-export default Users;
+const UsersData = withHOC(UserHoc);
+
+export default UsersData;
